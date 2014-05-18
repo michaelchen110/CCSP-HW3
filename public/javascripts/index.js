@@ -14,8 +14,8 @@ addButton.on('click', function(){
 });
 
 function save() {
-	var array = [],
-		done = [];
+	var array = [], done = [], 
+		data = [];
 	$(mainUl).find('span').each(function(){
 		array.push($(this).text());
 		if ($(this).parents('li').hasClass('is-done')) {
@@ -25,21 +25,17 @@ function save() {
 			done.push(0);
 		}
 	});
-	console.log("Array: ", array);
-	console.log("Done:", done);
-	$.ajaxSetup({
-		cache: false
-	});
-	var jqxhr =
-	    $.ajax({
+	for (var i = 0; i < array.length; i++) {
+		data.push({text:array[i], isDone:done[i]});
+	}
+	$.ajaxSetup({cache: false});
+	$.ajax({
 	        url: "/items",
 	        type: 'post',
-	        data: {
-	            name : array,
-	            isDone : done
-	        },
+	        data: {'TODO': data},
 	        success: function(response) {
-	        	console.log(response[0].text);
+	        	alert('Write success');
+	        	// console.log(response[0].text);
 	        	// json = JSON.parse(response);
 	    		// alert("Success: " + json.text);
 				// alert('Success: ' + response);
@@ -51,27 +47,39 @@ function save() {
 	        complete: function() {
 	        	// alert("complete"); 
 	        }
-	    });
-	localStorage.items = JSON.stringify(array);
-	localStorage.done = JSON.stringify(done);
+	 });
 }
 
 function load() {
-	if (!localStorage.items) {
-		console.log('null');
-		return;
-	}
-	var array = JSON.parse(localStorage.items);
-	var done = JSON.parse(localStorage.done);
-	for (var i = 0; i < array.length; i++) {
-		if (done[i] === 1) {
-			$(tmpl).appendTo(mainUl).find('span').text(array[i]).parents('li').addClass('is-done');
-		}
-		else {
-			$(tmpl).appendTo(mainUl).find('span').text(array[i]);
-		}
-	}
-	// console.log(array);
+	$.ajaxSetup({cache: false});
+	$.ajax({
+		url: "/items",
+	    type: 'get',
+	    success: function(response) {
+	    	// console.log(response);   	
+	    	if (response === 'undefined') {
+	    		alert('You need to add a new item');
+	    		return;
+	    	}
+	    	else {
+		    	var array = JSON.parse(response);
+				for (var i = 0; i < array.length; i++) {
+					if (array[i].isDone === 1) {
+						$(tmpl).appendTo(mainUl).find('span').text(array[i].text).parents('li').addClass('is-done');
+					}
+					else {
+						$(tmpl).appendTo(mainUl).find('span').text(array[i].text);
+					}
+				}
+	    	}	
+	    },
+        error: function() {
+  		  	alert('Error...');
+        },
+        complete: function() {	 
+           	// alert("load complete"); 
+        }
+	 });
 }
 
 mainUl.on('keyup', 'input', function(e){

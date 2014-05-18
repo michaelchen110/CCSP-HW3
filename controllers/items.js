@@ -1,17 +1,18 @@
+var fs = require('fs');
+
 exports.list = function (req, res) {
-  	// console.log("Req:" + req.query.name);
-    res.json([{
-    	text: 'Example TODOLIST',
-    	isDone: false
-  	}]);
+  var data = fs.readFileSync('data.json', encoding='utf8');
+  // console.log(data);
+  res.json(data);
 };
 
 exports.create = function (req, res) {
-  var newTodo = req.body;
-  newTodo.id = 1;// 2, 3, .....
+  // var obj = req.param('TODO').join(',');
+  // console.log(obj);
   
-  res.json(newTodo);
-  console.log(req.body.name);
+  // var data = JSON.stringify(req.param('TODO'));
+  // console.log(data);
+  fs.writeFileSync('data.json', JSON.stringify(req.param('TODO')), encoding='utf8');
 };
 
 exports.update = function (req, res) {

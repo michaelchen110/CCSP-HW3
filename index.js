@@ -2,7 +2,6 @@ var express = require('express');
 
 var items = require('./controllers/items');
 
-
 var app = express();
 
 /*
