@@ -16,9 +16,10 @@ exports.update = function (req, res) {
 };
 
 exports.reposition = function (req, res) {
-
+var data = fs.readFileSync('data.json', encoding='utf8');
 };
 
 exports.delete = function (req, res) {
-
+	var data = fs.readFileSync('data.json', encoding='utf8');
+  console.log(req.params.id);
 };
