@@ -102,10 +102,9 @@ doneUl.sortable({
 	connectWith: 'ul',
 	tolerance: 'pointer',
 	receive: function(event, ui){
-		// alert(ui.item.index());
-		$(ui.item).addClass('is-done');		
+		$(ui.item).addClass('is-done');	
 		$.ajax({
-			url: '/items/' + ui.item.index(),
+			url: '/items/' + id,
 			type: 'PUT',
 			success: function() {
 			}
@@ -120,7 +119,6 @@ deleteUl.sortable({
 	connectWith: 'ul',
 	tolerance: 'pointer',
 	receive: function(event, ui){
-		id = ui.item.index();
 		$.ajax({
 			url: '/items/' + id,
 			type: 'DELETE',
@@ -128,7 +126,6 @@ deleteUl.sortable({
 			}
 		});
 		$(ui.item).remove();
-
 	}
 });
 

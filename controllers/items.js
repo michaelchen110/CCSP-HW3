@@ -15,7 +15,7 @@ exports.create = function (req, res) {
 		data = JSON.parse(data);
 	}	
 	data.push(newItem);
-	fs.writeFileSync('data.json', JSON.stringify(data), encoding='utf8');
+	fs.writeFileSync('data.json', JSON.stringify(data, null, "\t"), encoding='utf8');
 	res.json("");
 };
 
@@ -24,7 +24,7 @@ exports.update = function (req, res) {
 		data = JSON.parse(fs.readFileSync('data.json', encoding='utf8'));
 
 	data[id].isDone = "1";
-	fs.writeFileSync('data.json', JSON.stringify(data), encoding='utf8');
+	fs.writeFileSync('data.json', JSON.stringify(data, null, "\t"), encoding='utf8');
 	res.json('');
 };
 
@@ -38,7 +38,7 @@ exports.reposition = function (req, res) {
 	data.splice(id, 1);
 	data.splice(new_position, 0, tmp);
 
-	fs.writeFileSync('data.json', JSON.stringify(data), encoding='utf8');
+	fs.writeFileSync('data.json', JSON.stringify(data, null, "\t"), encoding='utf8');
 	res.json('');
 };
 
@@ -51,7 +51,7 @@ exports.delete = function (req, res) {
 	}
 	else {
 		data.splice(id, 1);
-		fs.writeFileSync('data.json', JSON.stringify(data), encoding='utf8');
+		fs.writeFileSync('data.json', JSON.stringify(data, null, "\t"), encoding='utf8');
 	}
 	res.json('');
 };
