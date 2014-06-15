@@ -8,43 +8,11 @@ var tmpl = '<li><input type="text"><span></span></li>',
     mainUl = $('.main'),              // main <ul>
     deleteUl = $('.delete'),          // delete <ul>
     doneUl = $('.done');             // done <ul>
-var index;
+var id, new_position;
 
 addButton.on('click', function(){
 	$(tmpl).addClass('is-editing').appendTo(mainUl).find('input').focus();
 });
-
-function save() {
-	var array = [], done = [], 
-		data = {"TODO":[]};
-	$(mainUl).find('span').each(function(){
-		array.push($(this).text());
-		if ($(this).parents('li').hasClass('is-done')) {
-			done.push(1);
-		}
-		else {
-			done.push(0);
-		}
-	});
-	for (var i = 0; i < array.length; i++) {
-		data.TODO.push({text:array[i], isDone:done[i]});
-	}
-	$.ajaxSetup({cache: false});
-	$.ajax({
-	        url: "/items",
-	        type: 'post',
-	        data: data,
-	        success: function(response) {
-	        	// alert('Write success');
-	        },
-	        error: function() {
-	        	// alert('Error');
-	        },
-	        complete: function() {
-	        	// alert("complete"); 
-	        }
-	 });
-}
 
 function load() {
 	$.ajaxSetup({cache: false});
@@ -52,19 +20,18 @@ function load() {
 		url: "/items",
 	    type: 'get',
 	    success: function(response) {
-	    	console.log(response);
 	    	if (response === '{}') {
-	    		alert('You need to add a new item');
+	    		// alert('You need to add a new item');
 	    		return;
 	    	}
 	    	else {
 		    	var array = JSON.parse(response);
-				for (var i = 0; i < array.TODO.length; i++) {
-					if (array.TODO[i].isDone === '1') {
-						$(tmpl).appendTo(mainUl).find('span').text(array.TODO[i].text).parents('li').addClass('is-done');
+				for (var i = 0; i < array.length; i++) {
+					if (array[i].isDone === '1') {
+						$(tmpl).appendTo(mainUl).find('span').text(array[i].text).parents('li').addClass('is-done');
 					}
 					else {
-						$(tmpl).appendTo(mainUl).find('span').text(array.TODO[i].text);
+						$(tmpl).appendTo(mainUl).find('span').text(array[i].text);
 					}
 				}
 	    	}	
@@ -85,8 +52,23 @@ mainUl.on('keyup', 'input', function(e){
 	if (e.which === 13) {
 		li.find('span').text(input.val());
 		li.removeClass('is-editing');
-		save();
-	}
+		$.ajaxSetup({cache: false});
+		$.ajax({
+		        url: "/items",
+		        type: 'POST',
+		        data: {'item': input.val()},
+		        dataType: 'json',
+		        success: function(response) {
+		        	// alert(response.input.val());
+		        },
+		        error: function() {
+		        	// alert('Error');
+		        },
+		        complete: function() {
+		        	// alert("complete"); 
+		        }
+		 });
+		}
 });
 
 placeholder.on('mousedown', '.main', function(){
@@ -95,33 +77,58 @@ placeholder.on('mousedown', '.main', function(){
 placeholder.on('mouseup', function(){
 		placeholder.removeClass('is-dragging');
 });
+
+
 mainUl.sortable({
 	connectWith: 'ul',
 	tolerance: 'pointer',
-	stop: save
+	start: function(event, ui){
+		id = ui.item.index();
+	},
+	stop: function(event, ui){
+		new_position = ui.item.index();
+		if (id !== new_position && new_position !== -1) {
+			$.ajax({
+				url:'/items/'+ id + '/reposition/' + new_position,
+				type: 'PUT',
+				success: function(response){
+					// alert('success');
+				}
+			});
+		}
+	}
 });  
 doneUl.sortable({
 	connectWith: 'ul',
 	tolerance: 'pointer',
 	receive: function(event, ui){
-		alert(ui.item.index());
+		// alert(ui.item.index());
 		$(ui.item).addClass('is-done');		
-		$(ui.item).appendTo( $(ui.sender) );
-
 		$.ajax({
-			url: '/items/3',
-			type: 'put',
+			url: '/items/' + ui.item.index(),
+			type: 'PUT',
 			success: function() {
-				alert('aasaaa');
 			}
 		});
+
+		$(ui.item).appendTo( $(ui.sender) );
+
 	}
 });
+
 deleteUl.sortable({
 	connectWith: 'ul',
 	tolerance: 'pointer',
 	receive: function(event, ui){
+		id = ui.item.index();
+		$.ajax({
+			url: '/items/' + id,
+			type: 'DELETE',
+			success: function() {
+			}
+		});
 		$(ui.item).remove();
+
 	}
 });
 
